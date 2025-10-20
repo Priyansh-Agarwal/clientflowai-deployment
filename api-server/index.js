@@ -1,5 +1,6 @@
 // ClientFlow AI Suite - Production Ready API Server
-// This version works instantly on Vercel without any build process
+// Complete CRM with AI-powered business automation
+// Market-ready with all integrations and security features
 
 require('dotenv').config();
 const express = require('express');
@@ -7,12 +8,20 @@ const { createClient } = require('@supabase/supabase-js');
 const cors = require('cors');
 const helmet = require('helmet');
 const rateLimit = require('express-rate-limit');
+const compression = require('compression');
+const morgan = require('morgan');
 
 // Initialize Express app
 const app = express();
 const PORT = process.env.PORT || 3000;
 
 console.log('🚀 Starting ClientFlow AI Suite API Server...');
+console.log('📊 Production-ready CRM with AI automation');
+console.log('🔒 Enterprise-grade security and monitoring');
+
+// Production middleware
+app.use(compression());
+app.use(morgan('combined'));
 
 // Initialize Supabase client
 const supabaseUrl = process.env.SUPABASE_URL;
