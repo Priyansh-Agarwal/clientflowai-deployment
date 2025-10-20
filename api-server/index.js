@@ -451,6 +451,19 @@ app.get('/api/analytics/dashboard', async (req, res) => {
   }
 });
 
+// === ENTERPRISE ROUTES ===
+// Billing and Subscription Management
+app.use('/api/billing', require('./src/routes/billing'));
+
+// Data Export/Import
+app.use('/api/data-export', require('./src/routes/dataExport'));
+
+// Advanced Security (2FA, SSO, Audit Logs)
+app.use('/api/security', require('./src/routes/security'));
+
+// Advanced Reporting and BI
+app.use('/api/reporting', require('./src/routes/reporting'));
+
 // 404 handler
 app.use('*', (req, res) => {
   console.log(`❌ 404 - Route not found: ${req.method} ${req.path}`);
@@ -466,7 +479,17 @@ app.use('*', (req, res) => {
       'GET /api/customers - List customers',
       'POST /api/customers - Create customer',
       'GET /api/test - Database test',
-      'GET /api/analytics/dashboard - Analytics dashboard'
+      'GET /api/analytics/dashboard - Analytics dashboard',
+      'GET /api/billing/plans - Subscription plans',
+      'GET /api/billing/subscription - Current subscription',
+      'POST /api/billing/subscribe - Subscribe to plan',
+      'GET /api/data-export/export/contacts/csv - Export contacts',
+      'POST /api/data-export/import/contacts/csv - Import contacts',
+      'POST /api/security/2fa/setup - Setup 2FA',
+      'POST /api/security/2fa/verify-login - Verify 2FA',
+      'GET /api/security/audit-logs - Security audit logs',
+      'POST /api/reporting/reports/executive-summary - Executive report',
+      'GET /api/reporting/dashboard/realtime - Real-time dashboard'
     ]
   });
 });
