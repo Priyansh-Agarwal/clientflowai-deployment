@@ -1,0 +1,228 @@
+{
+  "name": "Dunning Automation",
+  "type": "dunning",
+  "description": "Automated payment collection and dunning sequences",
+  "version": "1.0.0",
+  "schema": {
+    "type": "object",
+    "properties": {
+      "enabled": {
+        "type": "boolean",
+        "default": true,
+        "description": "Enable this automation"
+      },
+      "triggers": {
+        "type": "object",
+        "properties": {
+          "payment_failed": {
+            "type": "boolean",
+            "default": true,
+            "description": "Start dunning sequence for failed payments"
+          },
+          "payment_overdue": {
+            "type": "boolean",
+            "default": true,
+            "description": "Start dunning sequence for overdue payments"
+          },
+          "subscription_cancelled": {
+            "type": "boolean",
+            "default": true,
+            "description": "Start retention sequence for cancelled subscriptions"
+          }
+        },
+        "required": ["payment_failed", "payment_overdue", "subscription_cancelled"]
+      },
+      "timing": {
+        "type": "object",
+        "properties": {
+          "grace_period_days": {
+            "type": "integer",
+            "default": 3,
+            "minimum": 0,
+            "maximum": 30,
+            "description": "Grace period before starting dunning sequence"
+          },
+          "sequence_intervals": {
+            "type": "array",
+            "items": {
+              "type": "integer",
+              "minimum": 1,
+              "maximum": 30
+            },
+            "default": [1, 3, 7, 14],
+            "description": "Days between dunning attempts"
+          },
+          "max_attempts": {
+            "type": "integer",
+            "default": 5,
+            "minimum": 1,
+            "maximum": 20,
+            "description": "Maximum dunning attempts"
+          },
+          "escalation_days": {
+            "type": "integer",
+            "default": 30,
+            "minimum": 7,
+            "maximum": 90,
+            "description": "Days before escalating to collections"
+          }
+        },
+        "required": ["grace_period_days", "sequence_intervals", "max_attempts", "escalation_days"]
+      },
+      "channels": {
+        "type": "object",
+        "properties": {
+          "primary_channel": {
+            "type": "string",
+            "enum": ["email", "sms", "both"],
+            "default": "email",
+            "description": "Primary channel for dunning messages"
+          },
+          "escalation_channel": {
+            "type": "string",
+            "enum": ["email", "sms", "phone", "all"],
+            "default": "all",
+            "description": "Channel for escalated dunning attempts"
+          },
+          "respect_contact_preferences": {
+            "type": "boolean",
+            "default": true,
+            "description": "Respect contact's communication preferences"
+          }
+        },
+        "required": ["primary_channel", "escalation_channel", "respect_contact_preferences"]
+      },
+      "templates": {
+        "type": "object",
+        "properties": {
+          "payment_failed_email": {
+            "type": "string",
+            "default": "Payment Failed - Action Required\n\nHi {contact_name},\n\nWe were unable to process your payment for {amount} due on {due_date}.\n\nPlease update your payment method or contact us to resolve this issue.\n\nPayment Link: {payment_link}\n\nIf you have any questions, please contact us at {phone}.\n\nBest regards,\n{business_name}",
+            "description": "Email template for failed payments"
+          },
+          "payment_overdue_email": {
+            "type": "string",
+            "default": "Payment Overdue - Immediate Attention Required\n\nHi {contact_name},\n\nYour payment of {amount} is now {days_overdue} days overdue.\n\nTo avoid service interruption, please make payment immediately:\n\nPayment Link: {payment_link}\n\nIf you're experiencing financial difficulties, please contact us to discuss payment options.\n\nPhone: {phone}\nEmail: {email}\n\nBest regards,\n{business_name}",
+            "description": "Email template for overdue payments"
+          },
+          "dunning_sms": {
+            "type": "string",
+            "default": "Hi {contact_name}, your payment of {amount} is overdue. Please pay now: {payment_link} Reply STOP to opt out.",
+            "description": "SMS template for dunning messages"
+          },
+          "retention_email": {
+            "type": "string",
+            "default": "We'd hate to see you go!\n\nHi {contact_name},\n\nWe noticed you cancelled your subscription. We'd love to understand why and see if we can help.\n\nIs there anything we could have done better? We're always looking to improve our service.\n\nIf you'd like to reactivate your account, we're offering a special discount: {discount_code}\n\nContact us: {phone} or {email}\n\nBest regards,\n{business_name}",
+            "description": "Email template for retention"
+          }
+        },
+        "required": ["payment_failed_email", "payment_overdue_email", "dunning_sms", "retention_email"]
+      },
+      "payment_handling": {
+        "type": "object",
+        "properties": {
+          "auto_retry": {
+            "type": "boolean",
+            "default": true,
+            "description": "Automatically retry failed payments"
+          },
+          "retry_attempts": {
+            "type": "integer",
+            "default": 3,
+            "minimum": 0,
+            "maximum": 10,
+            "description": "Number of automatic retry attempts"
+          },
+          "retry_intervals": {
+            "type": "array",
+            "items": {
+              "type": "integer",
+              "minimum": 1,
+              "maximum": 7
+            },
+            "default": [1, 3, 7],
+            "description": "Days between retry attempts"
+          },
+          "payment_links": {
+            "type": "boolean",
+            "default": true,
+            "description": "Include payment links in messages"
+          },
+          "partial_payments": {
+            "type": "boolean",
+            "default": true,
+            "description": "Allow partial payments"
+          }
+        },
+        "required": ["auto_retry", "retry_attempts", "retry_intervals", "payment_links", "partial_payments"]
+      },
+      "escalation": {
+        "type": "object",
+        "properties": {
+          "escalate_to_manager": {
+            "type": "boolean",
+            "default": true,
+            "description": "Escalate to manager after max attempts"
+          },
+          "escalate_to_collections": {
+            "type": "boolean",
+            "default": false,
+            "description": "Escalate to collections agency"
+          },
+          "suspend_service": {
+            "type": "boolean",
+            "default": true,
+            "description": "Suspend service for overdue accounts"
+          },
+          "suspend_days": {
+            "type": "integer",
+            "default": 14,
+            "minimum": 1,
+            "maximum": 60,
+            "description": "Days overdue before suspending service"
+          }
+        },
+        "required": ["escalate_to_manager", "escalate_to_collections", "suspend_service", "suspend_days"]
+      }
+    },
+    "required": ["enabled", "triggers", "timing", "channels", "templates", "payment_handling", "escalation"]
+  },
+  "defaultConfig": {
+    "enabled": true,
+    "triggers": {
+      "payment_failed": true,
+      "payment_overdue": true,
+      "subscription_cancelled": true
+    },
+    "timing": {
+      "grace_period_days": 3,
+      "sequence_intervals": [1, 3, 7, 14],
+      "max_attempts": 5,
+      "escalation_days": 30
+    },
+    "channels": {
+      "primary_channel": "email",
+      "escalation_channel": "all",
+      "respect_contact_preferences": true
+    },
+    "templates": {
+      "payment_failed_email": "Payment Failed - Action Required\n\nHi {contact_name},\n\nWe were unable to process your payment for {amount} due on {due_date}.\n\nPlease update your payment method or contact us to resolve this issue.\n\nPayment Link: {payment_link}\n\nIf you have any questions, please contact us at {phone}.\n\nBest regards,\n{business_name}",
+      "payment_overdue_email": "Payment Overdue - Immediate Attention Required\n\nHi {contact_name},\n\nYour payment of {amount} is now {days_overdue} days overdue.\n\nTo avoid service interruption, please make payment immediately:\n\nPayment Link: {payment_link}\n\nIf you're experiencing financial difficulties, please contact us to discuss payment options.\n\nPhone: {phone}\nEmail: {email}\n\nBest regards,\n{business_name}",
+      "dunning_sms": "Hi {contact_name}, your payment of {amount} is overdue. Please pay now: {payment_link} Reply STOP to opt out.",
+      "retention_email": "We'd hate to see you go!\n\nHi {contact_name},\n\nWe noticed you cancelled your subscription. We'd love to understand why and see if we can help.\n\nIs there anything we could have done better? We're always looking to improve our service.\n\nIf you'd like to reactivate your account, we're offering a special discount: {discount_code}\n\nContact us: {phone} or {email}\n\nBest regards,\n{business_name}"
+    },
+    "payment_handling": {
+      "auto_retry": true,
+      "retry_attempts": 3,
+      "retry_intervals": [1, 3, 7],
+      "payment_links": true,
+      "partial_payments": true
+    },
+    "escalation": {
+      "escalate_to_manager": true,
+      "escalate_to_collections": false,
+      "suspend_service": true,
+      "suspend_days": 14
+    }
+  }
+}

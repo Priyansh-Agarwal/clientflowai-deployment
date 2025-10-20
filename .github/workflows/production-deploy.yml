@@ -1,0 +1,94 @@
+name: 🚀 Production Deployment & Testing
+
+on:
+  push:
+    branches: [ main ]
+  pull_request:
+    branches: [ main ]
+
+jobs:
+  test:
+    name: 🧪 Test Production API
+    runs-on: ubuntu-latest
+    
+    steps:
+    - name: 📥 Checkout code
+      uses: actions/checkout@v4
+      
+    - name: 📦 Setup Node.js
+      uses: actions/setup-node@v4
+      with:
+        node-version: '18'
+        cache: 'npm'
+        
+    - name: 📦 Install dependencies
+      run: |
+        cd api-server
+        npm install
+        
+    - name: 🧪 Run production tests
+      run: |
+        cd api-server
+        npm run smoke:production
+      env:
+        NODE_ENV: test
+        
+    - name: ✅ Test API endpoints
+      run: |
+        cd api-server
+        node scripts/test-production-config.js
+
+  deploy:
+    name: 🚀 Deploy to Vercel
+    needs: test
+    runs-on: ubuntu-latest
+    if: github.ref == 'refs/heads/main'
+    
+    steps:
+    - name: 📥 Checkout code
+      uses: actions/checkout@v4
+      
+    - name: 📦 Setup Node.js
+      uses: actions/setup-node@v4
+      with:
+        node-version: '18'
+        cache: 'npm'
+        
+    - name: 🚀 Deploy to Vercel
+      uses: amondnet/vercel-action@v25
+      with:
+        vercel-token: ${{ secrets.VERCEL_TOKEN }}
+        vercel-org-id: ${{ secrets.VERCEL_ORG_ID }}
+        vercel-project-id: ${{ secrets.VERCEL_PROJECT_ID }}
+        working-directory: ./api-server
+        
+    - name: 🧪 Test deployed API
+      run: |
+        sleep 30
+        curl -f ${{ steps.deploy.outputs.preview-url }}/health || exit 1
+        echo "✅ Production API deployed and tested successfully!"
+
+  n8n-workflows:
+    name: 🔄 Validate n8n Workflows
+    runs-on: ubuntu-latest
+    
+    steps:
+    - name: 📥 Checkout code
+      uses: actions/checkout@v4
+      
+    - name: 🔍 Validate n8n workflow files
+      run: |
+        echo "🔍 Validating n8n workflow files..."
+        for file in n8n/*.json; do
+          if [ -f "$file" ]; then
+            echo "✅ Validating $file"
+            python3 -m json.tool "$file" > /dev/null
+            echo "✅ $file is valid JSON"
+          fi
+        done
+        
+    - name: 📊 Count workflows
+      run: |
+        echo "📊 Found $(ls n8n/*.json | wc -l) n8n workflow files"
+        echo "📋 Workflow files:"
+        ls -la n8n/*.json

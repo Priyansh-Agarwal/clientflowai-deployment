@@ -1,0 +1,223 @@
+{
+  "name": "SLA Automation",
+  "type": "sla",
+  "description": "Service Level Agreement monitoring and escalation",
+  "version": "1.0.0",
+  "schema": {
+    "type": "object",
+    "properties": {
+      "enabled": {
+        "type": "boolean",
+        "default": true,
+        "description": "Enable this automation"
+      },
+      "sla_rules": {
+        "type": "object",
+        "properties": {
+          "response_time_hours": {
+            "type": "integer",
+            "default": 4,
+            "minimum": 1,
+            "maximum": 24,
+            "description": "Maximum hours to respond to new inquiries"
+          },
+          "resolution_time_hours": {
+            "type": "integer",
+            "default": 24,
+            "minimum": 1,
+            "maximum": 168,
+            "description": "Maximum hours to resolve issues"
+          },
+          "follow_up_time_hours": {
+            "type": "integer",
+            "default": 2,
+            "minimum": 1,
+            "maximum": 24,
+            "description": "Hours to follow up after resolution"
+          },
+          "escalation_time_hours": {
+            "type": "integer",
+            "default": 8,
+            "minimum": 1,
+            "maximum": 48,
+            "description": "Hours before escalating to manager"
+          }
+        },
+        "required": ["response_time_hours", "resolution_time_hours", "follow_up_time_hours", "escalation_time_hours"]
+      },
+      "triggers": {
+        "type": "object",
+        "properties": {
+          "new_inquiry": {
+            "type": "boolean",
+            "default": true,
+            "description": "Monitor new inquiries for SLA compliance"
+          },
+          "ticket_created": {
+            "type": "boolean",
+            "default": true,
+            "description": "Monitor support tickets for SLA compliance"
+          },
+          "appointment_scheduled": {
+            "type": "boolean",
+            "default": true,
+            "description": "Monitor appointment scheduling for SLA compliance"
+          },
+          "deal_created": {
+            "type": "boolean",
+            "default": true,
+            "description": "Monitor deal creation for SLA compliance"
+          }
+        },
+        "required": ["new_inquiry", "ticket_created", "appointment_scheduled", "deal_created"]
+      },
+      "escalation": {
+        "type": "object",
+        "properties": {
+          "escalate_to_manager": {
+            "type": "boolean",
+            "default": true,
+            "description": "Escalate to manager when SLA is breached"
+          },
+          "escalate_to_team": {
+            "type": "boolean",
+            "default": true,
+            "description": "Notify team when SLA is at risk"
+          },
+          "escalate_to_customer": {
+            "type": "boolean",
+            "default": true,
+            "description": "Notify customer when SLA is breached"
+          },
+          "auto_assign": {
+            "type": "boolean",
+            "default": true,
+            "description": "Automatically assign unassigned items"
+          }
+        },
+        "required": ["escalate_to_manager", "escalate_to_team", "escalate_to_customer", "auto_assign"]
+      },
+      "notifications": {
+        "type": "object",
+        "properties": {
+          "warning_threshold": {
+            "type": "number",
+            "default": 0.8,
+            "minimum": 0.1,
+            "maximum": 1.0,
+            "description": "Percentage of SLA time before sending warning"
+          },
+          "channels": {
+            "type": "array",
+            "items": {
+              "type": "string",
+              "enum": ["email", "sms", "slack", "teams"]
+            },
+            "default": ["email", "slack"],
+            "description": "Channels for SLA notifications"
+          },
+          "include_metrics": {
+            "type": "boolean",
+            "default": true,
+            "description": "Include SLA metrics in notifications"
+          }
+        },
+        "required": ["warning_threshold", "channels", "include_metrics"]
+      },
+      "templates": {
+        "type": "object",
+        "properties": {
+          "sla_warning_email": {
+            "type": "string",
+            "default": "SLA Warning - {item_type} #{item_id}\n\nHi {assignee_name},\n\nThis is a reminder that {item_type} #{item_id} is approaching its SLA deadline.\n\nTime remaining: {time_remaining}\nSLA deadline: {sla_deadline}\n\nPlease take action to ensure SLA compliance.\n\nBest regards,\nSLA Monitor",
+            "description": "Email template for SLA warnings"
+          },
+          "sla_breach_email": {
+            "type": "string",
+            "default": "SLA BREACH - {item_type} #{item_id}\n\nHi {manager_name},\n\n{item_type} #{item_id} has breached its SLA.\n\nBreach time: {breach_time}\nSLA deadline: {sla_deadline}\nAssigned to: {assignee_name}\n\nImmediate attention required.\n\nBest regards,\nSLA Monitor",
+            "description": "Email template for SLA breaches"
+          },
+          "sla_breach_customer_email": {
+            "type": "string",
+            "default": "Update on Your Request\n\nHi {customer_name},\n\nWe wanted to update you on your recent request (#{item_id}).\n\nWe apologize for the delay in responding. Our team is working to resolve this as quickly as possible.\n\nExpected resolution: {expected_resolution}\n\nIf you have any questions, please contact us at {phone}.\n\nBest regards,\n{business_name}",
+            "description": "Email template for customer SLA breach notifications"
+          },
+          "sla_slack_message": {
+            "type": "string",
+            "default": "🚨 SLA Alert: {item_type} #{item_id} is {status}\n\nAssigned to: {assignee_name}\nTime remaining: {time_remaining}\nSLA deadline: {sla_deadline}\n\n<{item_url}|View Details>",
+            "description": "Slack template for SLA notifications"
+          }
+        },
+        "required": ["sla_warning_email", "sla_breach_email", "sla_breach_customer_email", "sla_slack_message"]
+      },
+      "reporting": {
+        "type": "object",
+        "properties": {
+          "daily_reports": {
+            "type": "boolean",
+            "default": true,
+            "description": "Generate daily SLA reports"
+          },
+          "weekly_reports": {
+            "type": "boolean",
+            "default": true,
+            "description": "Generate weekly SLA reports"
+          },
+          "monthly_reports": {
+            "type": "boolean",
+            "default": true,
+            "description": "Generate monthly SLA reports"
+          },
+          "report_recipients": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            },
+            "default": ["managers@company.com"],
+            "description": "Email addresses for SLA reports"
+          }
+        },
+        "required": ["daily_reports", "weekly_reports", "monthly_reports", "report_recipients"]
+      }
+    },
+    "required": ["enabled", "sla_rules", "triggers", "escalation", "notifications", "templates", "reporting"]
+  },
+  "defaultConfig": {
+    "enabled": true,
+    "sla_rules": {
+      "response_time_hours": 4,
+      "resolution_time_hours": 24,
+      "follow_up_time_hours": 2,
+      "escalation_time_hours": 8
+    },
+    "triggers": {
+      "new_inquiry": true,
+      "ticket_created": true,
+      "appointment_scheduled": true,
+      "deal_created": true
+    },
+    "escalation": {
+      "escalate_to_manager": true,
+      "escalate_to_team": true,
+      "escalate_to_customer": true,
+      "auto_assign": true
+    },
+    "notifications": {
+      "warning_threshold": 0.8,
+      "channels": ["email", "slack"],
+      "include_metrics": true
+    },
+    "templates": {
+      "sla_warning_email": "SLA Warning - {item_type} #{item_id}\n\nHi {assignee_name},\n\nThis is a reminder that {item_type} #{item_id} is approaching its SLA deadline.\n\nTime remaining: {time_remaining}\nSLA deadline: {sla_deadline}\n\nPlease take action to ensure SLA compliance.\n\nBest regards,\nSLA Monitor",
+      "sla_breach_email": "SLA BREACH - {item_type} #{item_id}\n\nHi {manager_name},\n\n{item_type} #{item_id} has breached its SLA.\n\nBreach time: {breach_time}\nSLA deadline: {sla_deadline}\nAssigned to: {assignee_name}\n\nImmediate attention required.\n\nBest regards,\nSLA Monitor",
+      "sla_breach_customer_email": "Update on Your Request\n\nHi {customer_name},\n\nWe wanted to update you on your recent request (#{item_id}).\n\nWe apologize for the delay in responding. Our team is working to resolve this as quickly as possible.\n\nExpected resolution: {expected_resolution}\n\nIf you have any questions, please contact us at {phone}.\n\nBest regards,\n{business_name}",
+      "sla_slack_message": "🚨 SLA Alert: {item_type} #{item_id} is {status}\n\nAssigned to: {assignee_name}\nTime remaining: {time_remaining}\nSLA deadline: {sla_deadline}\n\n<{item_url}|View Details>"
+    },
+    "reporting": {
+      "daily_reports": true,
+      "weekly_reports": true,
+      "monthly_reports": true,
+      "report_recipients": ["managers@company.com"]
+    }
+  }
+}

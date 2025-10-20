@@ -1,0 +1,111 @@
+# Gitleaks configuration for ClientFlow AI Suite
+# Scans for secrets and sensitive information in the repository
+
+[gitleaks]
+  version = "8.18.0"
+  description = "ClientFlow AI Suite - Secret Detection Configuration"
+
+# Rules for detecting secrets
+[[rules]]
+  description = "Supabase Service Role Key"
+  regex = '''eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9\.[A-Za-z0-9_-]+\.[A-Za-z0-9_-]+'''
+  tags = ["supabase", "jwt", "secret"]
+
+[[rules]]
+  description = "Supabase Anon Key"
+  regex = '''eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9\.[A-Za-z0-9_-]+\.[A-Za-z0-9_-]+'''
+  tags = ["supabase", "jwt", "public"]
+
+[[rules]]
+  description = "API Keys"
+  regex = '''(?i)(api[_-]?key|apikey|access[_-]?key|secret[_-]?key)\s*[:=]\s*['\"]?[a-zA-Z0-9]{20,}['\"]?'''
+  tags = ["api", "key", "secret"]
+
+[[rules]]
+  description = "Database URLs"
+  regex = '''(postgres|mysql|mongodb)://[^\\s]+'''
+  tags = ["database", "url", "connection"]
+
+[[rules]]
+  description = "JWT Secrets"
+  regex = '''(?i)jwt[_-]?secret\s*[:=]\s*['\"]?[a-zA-Z0-9]{32,}['\"]?'''
+  tags = ["jwt", "secret", "auth"]
+
+[[rules]]
+  description = "Twilio Credentials"
+  regex = '''(?i)(twilio[_-]?account[_-]?sid|twilio[_-]?auth[_-]?token)\s*[:=]\s*['\"]?[a-zA-Z0-9]{32,}['\"]?'''
+  tags = ["twilio", "sms", "credentials"]
+
+[[rules]]
+  description = "SendGrid API Key"
+  regex = '''(?i)sendgrid[_-]?api[_-]?key\s*[:=]\s*['\"]?SG\.[a-zA-Z0-9_-]{22}\.[a-zA-Z0-9_-]{43}['\"]?'''
+  tags = ["sendgrid", "email", "api"]
+
+[[rules]]
+  description = "OpenAI API Key"
+  regex = '''(?i)openai[_-]?api[_-]?key\s*[:=]\s*['\"]?sk-[a-zA-Z0-9]{48}['\"]?'''
+  tags = ["openai", "ai", "api"]
+
+[[rules]]
+  description = "Stripe Keys"
+  regex = '''(?i)(stripe[_-]?secret[_-]?key|stripe[_-]?publishable[_-]?key)\s*[:=]\s*['\"]?(sk_|pk_)[a-zA-Z0-9]{24,}['\"]?'''
+  tags = ["stripe", "payment", "key"]
+
+[[rules]]
+  description = "AWS Credentials"
+  regex = '''(?i)(aws[_-]?access[_-]?key[_-]?id|aws[_-]?secret[_-]?access[_-]?key)\s*[:=]\s*['\"]?[a-zA-Z0-9]{20,}['\"]?'''
+  tags = ["aws", "credentials", "cloud"]
+
+[[rules]]
+  description = "GitHub Tokens"
+  regex = '''(?i)(github[_-]?token|ghp_[a-zA-Z0-9]{36})'''
+  tags = ["github", "token", "ci"]
+
+[[rules]]
+  description = "Vercel Tokens"
+  regex = '''(?i)(vercel[_-]?token)\s*[:=]\s*['\"]?[a-zA-Z0-9]{24,}['\"]?'''
+  tags = ["vercel", "deployment", "token"]
+
+# Exclude patterns (files/directories to ignore)
+[gitleaks.allowlist]
+  description = "Files and patterns to exclude from scanning"
+  
+  [[gitleaks.allowlist.entropies]]
+    description = "Exclude high entropy strings in specific files"
+    path = "README.md"
+    entropy = 7.0
+  
+  [[gitleaks.allowlist.entropies]]
+    description = "Exclude high entropy strings in test files"
+    path = "test/"
+    entropy = 8.0
+  
+  [[gitleaks.allowlist.entropies]]
+    description = "Exclude high entropy strings in documentation"
+    path = "docs/"
+    entropy = 7.0
+
+  # Exclude specific files
+  files = [
+    "package-lock.json",
+    "pnpm-lock.yaml",
+    "yarn.lock",
+    "*.min.js",
+    "*.min.css",
+    "node_modules/**",
+    ".git/**",
+    "dist/**",
+    "build/**"
+  ]
+
+  # Exclude specific patterns
+  regexes = [
+    "example\\.com",
+    "test@.*",
+    "localhost",
+    "127\\.0\\.0\\.1",
+    "your_.*_here",
+    "replace_with_.*",
+    "TODO.*",
+    "FIXME.*"
+  ]

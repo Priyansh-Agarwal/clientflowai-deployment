@@ -1,0 +1,189 @@
+{
+  "name": "Reminder Automation",
+  "type": "reminder",
+  "description": "Sends automated reminders for appointments and tasks",
+  "version": "1.0.0",
+  "schema": {
+    "type": "object",
+    "properties": {
+      "enabled": {
+        "type": "boolean",
+        "default": true,
+        "description": "Enable this automation"
+      },
+      "triggers": {
+        "type": "object",
+        "properties": {
+          "appointment_reminders": {
+            "type": "boolean",
+            "default": true,
+            "description": "Send reminders for appointments"
+          },
+          "task_reminders": {
+            "type": "boolean",
+            "default": true,
+            "description": "Send reminders for tasks"
+          },
+          "follow_up_reminders": {
+            "type": "boolean",
+            "default": true,
+            "description": "Send follow-up reminders for deals"
+          }
+        },
+        "required": ["appointment_reminders", "task_reminders", "follow_up_reminders"]
+      },
+      "timing": {
+        "type": "object",
+        "properties": {
+          "appointment_hours": {
+            "type": "array",
+            "items": {
+              "type": "integer",
+              "minimum": 1,
+              "maximum": 168
+            },
+            "default": [24, 2, 1],
+            "description": "Hours before appointment to send reminders"
+          },
+          "task_hours": {
+            "type": "array",
+            "items": {
+              "type": "integer",
+              "minimum": 1,
+              "maximum": 168
+            },
+            "default": [24, 2],
+            "description": "Hours before task due date to send reminders"
+          },
+          "follow_up_days": {
+            "type": "array",
+            "items": {
+              "type": "integer",
+              "minimum": 1,
+              "maximum": 30
+            },
+            "default": [1, 3, 7],
+            "description": "Days after last contact to send follow-up reminders"
+          }
+        },
+        "required": ["appointment_hours", "task_hours", "follow_up_days"]
+      },
+      "channels": {
+        "type": "object",
+        "properties": {
+          "primary_channel": {
+            "type": "string",
+            "enum": ["sms", "email", "both"],
+            "default": "both",
+            "description": "Primary channel for reminders"
+          },
+          "fallback_channel": {
+            "type": "string",
+            "enum": ["sms", "email", "none"],
+            "default": "sms",
+            "description": "Fallback channel if primary fails"
+          },
+          "respect_contact_preferences": {
+            "type": "boolean",
+            "default": true,
+            "description": "Respect contact's communication preferences"
+          }
+        },
+        "required": ["primary_channel", "fallback_channel", "respect_contact_preferences"]
+      },
+      "templates": {
+        "type": "object",
+        "properties": {
+          "appointment_sms": {
+            "type": "string",
+            "default": "Reminder: You have an appointment with {business_name} on {date} at {time}. Reply STOP to opt out.",
+            "description": "SMS template for appointment reminders"
+          },
+          "appointment_email": {
+            "type": "string",
+            "default": "Appointment Reminder - {business_name}\n\nHi {contact_name},\n\nThis is a reminder that you have an appointment scheduled for {date} at {time}.\n\nLocation: {location}\n\nPlease arrive 10 minutes early. If you need to reschedule, please contact us at {phone}.\n\nBest regards,\n{business_name}",
+            "description": "Email template for appointment reminders"
+          },
+          "task_sms": {
+            "type": "string",
+            "default": "Task reminder: {task_title} is due {due_date}. Reply STOP to opt out.",
+            "description": "SMS template for task reminders"
+          },
+          "follow_up_sms": {
+            "type": "string",
+            "default": "Hi {contact_name}, just following up on {deal_title}. Any questions? Reply STOP to opt out.",
+            "description": "SMS template for follow-up reminders"
+          }
+        },
+        "required": ["appointment_sms", "appointment_email", "task_sms", "follow_up_sms"]
+      },
+      "advanced": {
+        "type": "object",
+        "properties": {
+          "max_reminders_per_day": {
+            "type": "integer",
+            "default": 3,
+            "minimum": 1,
+            "maximum": 10,
+            "description": "Maximum reminders per contact per day"
+          },
+          "skip_weekends": {
+            "type": "boolean",
+            "default": true,
+            "description": "Skip sending reminders on weekends"
+          },
+          "timezone_aware": {
+            "type": "boolean",
+            "default": true,
+            "description": "Send reminders in contact's timezone"
+          },
+          "retry_failed": {
+            "type": "boolean",
+            "default": true,
+            "description": "Retry failed reminder deliveries"
+          },
+          "retry_attempts": {
+            "type": "integer",
+            "default": 2,
+            "minimum": 0,
+            "maximum": 5,
+            "description": "Number of retry attempts for failed deliveries"
+          }
+        },
+        "required": ["max_reminders_per_day", "skip_weekends", "timezone_aware", "retry_failed", "retry_attempts"]
+      }
+    },
+    "required": ["enabled", "triggers", "timing", "channels", "templates", "advanced"]
+  },
+  "defaultConfig": {
+    "enabled": true,
+    "triggers": {
+      "appointment_reminders": true,
+      "task_reminders": true,
+      "follow_up_reminders": true
+    },
+    "timing": {
+      "appointment_hours": [24, 2, 1],
+      "task_hours": [24, 2],
+      "follow_up_days": [1, 3, 7]
+    },
+    "channels": {
+      "primary_channel": "both",
+      "fallback_channel": "sms",
+      "respect_contact_preferences": true
+    },
+    "templates": {
+      "appointment_sms": "Reminder: You have an appointment with {business_name} on {date} at {time}. Reply STOP to opt out.",
+      "appointment_email": "Appointment Reminder - {business_name}\n\nHi {contact_name},\n\nThis is a reminder that you have an appointment scheduled for {date} at {time}.\n\nLocation: {location}\n\nPlease arrive 10 minutes early. If you need to reschedule, please contact us at {phone}.\n\nBest regards,\n{business_name}",
+      "task_sms": "Task reminder: {task_title} is due {due_date}. Reply STOP to opt out.",
+      "follow_up_sms": "Hi {contact_name}, just following up on {deal_title}. Any questions? Reply STOP to opt out."
+    },
+    "advanced": {
+      "max_reminders_per_day": 3,
+      "skip_weekends": true,
+      "timezone_aware": true,
+      "retry_failed": true,
+      "retry_attempts": 2
+    }
+  }
+}

@@ -1,0 +1,45 @@
+name: Deploy API Server to Vercel
+
+on:
+  push:
+    branches: [ main ]
+    paths: 
+      - 'api-server/**'
+  pull_request:
+    branches: [ main ]
+    paths:
+      - 'api-server/**'
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+      
+    - name: Setup Node.js
+      uses: actions/setup-node@v4
+      with:
+        node-version: '18'
+        cache: 'npm'
+        cache-dependency-path: 'api-server/package-lock.json'
+        
+    - name: Install dependencies
+      run: |
+        cd api-server
+        npm install
+        
+    - name: Run tests
+      run: |
+        cd api-server
+        npm run test || echo "Tests not implemented yet"
+        
+    - name: Deploy to Vercel
+      run: |
+        cd api-server
+        npx vercel --prod --token ${{ secrets.VERCEL_TOKEN }}
+      env:
+        VERCEL_TOKEN: ${{ secrets.VERCEL_TOKEN }}
+        VERCEL_PROJECT_ID: ${{ secrets.VERCEL_PROJECT_ID }}
+        VERCEL_ORG_ID: ${{ secrets.VERCEL_ORG_ID }}

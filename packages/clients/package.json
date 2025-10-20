@@ -1,0 +1,24 @@
+{
+  "name": "@clientflow/clients",
+  "version": "1.0.0",
+  "private": true,
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "scripts": {
+    "build": "tsc",
+    "dev": "tsc --watch",
+    "clean": "rm -rf dist",
+    "typecheck": "tsc --noEmit"
+  },
+  "dependencies": {
+    "@clientflow/types": "workspace:*",
+    "@prisma/client": "^5.7.0",
+    "axios": "^1.6.0",
+    "pino": "^8.17.2"
+  },
+  "devDependencies": {
+    "@clientflow/tsconfig": "workspace:*",
+    "typescript": "^5.3.0"
+  }
+}
+

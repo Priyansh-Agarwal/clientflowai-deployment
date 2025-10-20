@@ -1,0 +1,285 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+enum MembershipRole {
+  owner
+  admin
+  member
+}
+
+enum DealStage {
+  lead
+  qualified
+  proposal
+  won
+  lost
+}
+
+enum ActivityType {
+  note
+  call
+  sms
+  email
+  task
+}
+
+enum AppointmentStatus {
+  pending
+  confirmed
+  completed
+  no_show
+  canceled
+}
+
+enum MessageDirection {
+  inbound
+  outbound
+}
+
+enum MessageChannel {
+  sms
+  email
+  whatsapp
+}
+
+enum AutomationType {
+  booking
+  reminder
+  review
+  nurture
+  dunning
+  sla
+}
+
+model Organization {
+  id        String   @id @default(uuid()) @db.Uuid
+  name      String
+  createdAt DateTime @default(now()) @map("created_at") @db.Timestamptz(6)
+
+  // Relations
+  memberships Membership[]
+  contacts    Contact[]
+  deals       Deal[]
+  activities  Activity[]
+  appointments Appointment[]
+  messages    Message[]
+  automations Automation[]
+  dailyMetrics DailyMetric[]
+
+  @@map("organizations")
+}
+
+model User {
+  id        String   @id @default(uuid()) @db.Uuid
+  email     String   @unique
+  name      String?
+  createdAt DateTime @default(now()) @map("created_at") @db.Timestamptz(6)
+
+  // Relations
+  memberships Membership[]
+
+  @@map("users")
+}
+
+model Membership {
+  userId String         @map("user_id") @db.Uuid
+  orgId  String         @map("org_id") @db.Uuid
+  role   MembershipRole
+
+  // Relations
+  user User         @relation(fields: [userId], references: [id], onDelete: Cascade)
+  org  Organization @relation(fields: [orgId], references: [id], onDelete: Cascade)
+
+  @@id([userId, orgId])
+  @@map("memberships")
+}
+
+model Contact {
+  id        String   @id @default(uuid()) @db.Uuid
+  orgId     String   @map("org_id") @db.Uuid
+  firstName String   @map("first_name")
+  lastName  String?  @map("last_name")
+  email     String?
+  phone     String?
+  tags      String[] @default([])
+  createdAt DateTime @default(now()) @map("created_at") @db.Timestamptz(6)
+
+  // Relations
+  org         Organization   @relation(fields: [orgId], references: [id], onDelete: Cascade)
+  deals       Deal[]
+  activities  Activity[]
+  appointments Appointment[]
+
+  // Unique constraints per organization
+  @@unique([orgId, email], name: "contact_email_per_org")
+  @@unique([orgId, phone], name: "contact_phone_per_org")
+  @@index([orgId, createdAt])
+  @@map("contacts")
+}
+
+model Deal {
+  id          String    @id @default(uuid()) @db.Uuid
+  orgId       String    @map("org_id") @db.Uuid
+  contactId   String    @map("contact_id") @db.Uuid
+  title       String
+  stage       DealStage
+  valueCents  Int       @map("value_cents")
+  currency    String    @default("USD")
+  createdAt   DateTime  @default(now()) @map("created_at") @db.Timestamptz(6)
+  updatedAt   DateTime  @updatedAt @map("updated_at") @db.Timestamptz(6)
+
+  // Relations
+  org       Organization @relation(fields: [orgId], references: [id], onDelete: Cascade)
+  contact   Contact      @relation(fields: [contactId], references: [id], onDelete: Cascade)
+  activities Activity[]
+
+  @@index([orgId, createdAt])
+  @@index([stage])
+  @@map("deals")
+}
+
+model Activity {
+  id        String       @id @default(uuid()) @db.Uuid
+  orgId     String       @map("org_id") @db.Uuid
+  contactId String?      @map("contact_id") @db.Uuid
+  dealId    String?      @map("deal_id") @db.Uuid
+  type      ActivityType
+  content   String
+  meta      Json?
+  createdAt DateTime     @default(now()) @map("created_at") @db.Timestamptz(6)
+
+  // Relations
+  org     Organization @relation(fields: [orgId], references: [id], onDelete: Cascade)
+  contact Contact?     @relation(fields: [contactId], references: [id], onDelete: Cascade)
+  deal    Deal?        @relation(fields: [dealId], references: [id], onDelete: Cascade)
+
+  @@index([orgId, createdAt])
+  @@map("activities")
+}
+
+model Appointment {
+  id            String            @id @default(uuid()) @db.Uuid
+  orgId         String            @map("org_id") @db.Uuid
+  contactId     String            @map("contact_id") @db.Uuid
+  startsAt      DateTime          @map("starts_at") @db.Timestamptz(6)
+  endsAt        DateTime          @map("ends_at") @db.Timestamptz(6)
+  status        AppointmentStatus
+  location      String?
+  googleEventId String?           @map("google_event_id")
+  createdAt     DateTime          @default(now()) @map("created_at") @db.Timestamptz(6)
+
+  // Relations
+  org     Organization @relation(fields: [orgId], references: [id], onDelete: Cascade)
+  contact Contact      @relation(fields: [contactId], references: [id], onDelete: Cascade)
+
+  @@index([orgId, createdAt])
+  @@index([googleEventId])
+  @@map("appointments")
+}
+
+model Message {
+  id        String          @id @default(uuid()) @db.Uuid
+  orgId     String          @map("org_id") @db.Uuid
+  direction MessageDirection
+  channel   MessageChannel
+  toAddr    String          @map("to_addr")
+  fromAddr  String          @map("from_addr")
+  body      String
+  meta      Json?
+  createdAt DateTime        @default(now()) @map("created_at") @db.Timestamptz(6)
+
+  // Relations
+  org Organization @relation(fields: [orgId], references: [id], onDelete: Cascade)
+
+  @@index([orgId, createdAt])
+  @@map("messages")
+}
+
+model Automation {
+  id        String          @id @default(uuid()) @db.Uuid
+  orgId     String          @map("org_id") @db.Uuid
+  name      String
+  type      AutomationType
+  config    Json
+  isEnabled Boolean         @default(true) @map("is_enabled")
+  createdAt DateTime        @default(now()) @map("created_at") @db.Timestamptz(6)
+
+  // Relations
+  org Organization @relation(fields: [orgId], references: [id], onDelete: Cascade)
+
+  @@index([orgId, createdAt])
+  @@map("automations")
+}
+
+model DailyMetric {
+  id           String   @id @default(uuid()) @db.Uuid
+  date         DateTime @db.Date
+  orgId        String   @map("org_id") @db.Uuid
+  leads        Int      @default(0)
+  dealsWon     Int      @map("deals_won") @default(0)
+  revenueCents Int      @map("revenue_cents") @default(0)
+  showRate     Decimal  @map("show_rate") @default(0) @db.Decimal(5, 4)
+  createdAt    DateTime @default(now()) @map("created_at") @db.Timestamptz(6)
+
+  // Relations
+  org Organization @relation(fields: [orgId], references: [id], onDelete: Cascade)
+
+  @@unique([date, orgId])
+  @@index([orgId, date])
+  @@map("daily_metrics")
+}
+
+model Subscription {
+  id                   String    @id @default(uuid()) @db.Uuid
+  orgId                String    @unique @map("org_id") @db.Uuid
+  stripeCustomerId     String    @unique @map("stripe_customer_id")
+  stripeSubscriptionId String?   @map("stripe_subscription_id")
+  plan                 String    @default("free")
+  status               String    @default("active")
+  currentPeriodStart   DateTime? @map("current_period_start") @db.Timestamptz(6)
+  currentPeriodEnd     DateTime? @map("current_period_end") @db.Timestamptz(6)
+  cancelAtPeriodEnd    Boolean   @default(false) @map("cancel_at_period_end")
+  canceledAt           DateTime? @map("canceled_at") @db.Timestamptz(6)
+  trialStart           DateTime? @map("trial_start") @db.Timestamptz(6)
+  trialEnd             DateTime? @map("trial_end") @db.Timestamptz(6)
+  meta                 Json      @default("{}")
+  createdAt            DateTime  @default(now()) @map("created_at") @db.Timestamptz(6)
+  updatedAt            DateTime  @updatedAt @map("updated_at") @db.Timestamptz(6)
+
+  // Relations
+  org Organization @relation(fields: [orgId], references: [id], onDelete: Cascade)
+
+  @@index([plan])
+  @@index([status])
+  @@map("subscriptions")
+}
+
+model CalendarConnection {
+  id          String   @id @default(uuid()) @db.Uuid
+  orgId       String   @map("org_id") @db.Uuid
+  provider    String
+  credentials Json     @default("{}")
+  isActive    Boolean  @default(true) @map("is_active")
+  lastSyncAt  DateTime? @map("last_sync_at") @db.Timestamptz(6)
+  meta        Json     @default("{}")
+  createdAt   DateTime @default(now()) @map("created_at") @db.Timestamptz(6)
+  updatedAt   DateTime @updatedAt @map("updated_at") @db.Timestamptz(6)
+
+  // Relations
+  org Organization @relation(fields: [orgId], references: [id], onDelete: Cascade)
+
+  @@unique([orgId, provider])
+  @@index([provider])
+  @@index([isActive])
+  @@map("calendar_connections")
+}
+

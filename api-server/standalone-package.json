@@ -1,0 +1,29 @@
+{
+  "name": "clientflow-hardened-api",
+  "version": "1.0.0",
+  "description": "Hardened ClientFlow API Server - Production Ready",
+  "main": "standalone-server.js",
+  "scripts": {
+    "start": "node standalone-server.js",
+    "dev": "node standalone-server.js",
+    "test": "node ../test-api.js"
+  },
+  "dependencies": {
+    "express": "^4.18.2",
+    "cors": "^2.8.5",
+    "helmet": "^7.1.0",
+    "compression": "^1.7.4"
+  },
+  "engines": {
+    "node": ">=18.0.0"
+  },
+  "keywords": [
+    "crm",
+    "api",
+    "clientflow",
+    "hardened",
+    "production-ready"
+  ],
+  "author": "ClientFlow AI Suite",
+  "license": "MIT"
+}

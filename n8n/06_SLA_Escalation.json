@@ -1,0 +1,90 @@
+{
+  "name": "ClientFlow — SLA & Escalation (Unanswered > 5m)",
+  "nodes": [
+    {
+      "parameters": {
+        "keepOnlySet": true,
+        "values": { "string": [
+          { "name": "API_BASE_URL", "value": "https://YOUR-API-DOMAIN.com/api" },
+          { "name": "ORG_ID", "value": "REPLACE_WITH_ORG_UUID" },
+          { "name": "AUTH_TOKEN", "value": "Bearer REPLACE_WITH_PERSONAL_ORG_TOKEN" },
+          { "name": "SLACK_WEBHOOK_URL", "value": "https://hooks.slack.com/services/REPLACE" }
+        ]}
+      },
+      "id": "setEnv",
+      "name": "Set ENV",
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 2,
+      "position": [220, 180]
+    },
+    {
+      "parameters": { "triggerTimes": [{ "item": { "hour": 0, "minute": 0 } }], "rule": { "interval": 5, "unit": "minutes" } },
+      "id": "cron5m",
+      "name": "Cron (Every 5m)",
+      "type": "n8n-nodes-base.cron",
+      "typeVersion": 1,
+      "position": [40, 180]
+    },
+    {
+      "parameters": {
+        "requestMethod": "GET",
+        "url": "={{$json.API_BASE_URL}}/sla/unanswered?minutes=5",
+        "jsonParameters": true,
+        "options": {},
+        "headerParametersJson": "[{\"name\":\"Authorization\",\"value\":\"={{$json.AUTH_TOKEN}}\"}]",
+        "queryParametersJson": "[{\"name\":\"orgId\",\"value\":\"={{$json.ORG_ID}}\"}]"
+      },
+      "id": "fetchUnanswered",
+      "name": "Fetch Unanswered >5m",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4,
+      "position": [440, 180]
+    },
+    {
+      "parameters": { "fieldToSplitOut": "data" },
+      "id": "splitTickets",
+      "name": "Split Conversations",
+      "type": "n8n-nodes-base.itemLists",
+      "typeVersion": 1,
+      "position": [680, 180]
+    },
+    {
+      "parameters": {
+        "url": "={{$json.SLACK_WEBHOOK_URL}}",
+        "jsonParameters": true,
+        "options": {},
+        "payload": "={{ {text: `⏰ SLA breach: conversation ${$json.id} waiting >5m. Assign now.`} }}"
+      },
+      "id": "slackPing",
+      "name": "Slack @On-call",
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 1,
+      "position": [920, 120]
+    },
+    {
+      "parameters": {
+        "requestMethod": "POST",
+        "url": "={{$json.API_BASE_URL}}/messages/outbound",
+        "jsonParameters": true,
+        "options": {},
+        "headerParametersJson": "[{\"name\":\"Authorization\",\"value\":\"={{$json.AUTH_TOKEN}}\"}]",
+        "bodyParametersJson": "{\"orgId\":\"={{$json.ORG_ID}}\",\"channel\":\"sms\",\"to_addr\":\"={{$json.on_call_phone || \"+15555550123\"}}\",\"body\":\"SLA breach: check Slack for details.\"}"
+      },
+      "id": "smsEscalate",
+      "name": "SMS Escalation",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4,
+      "position": [920, 260]
+    }
+  ],
+  "connections": {
+    "Cron (Every 5m)": { "main": [[{ "node": "Set ENV", "type": "main", "index": 0 }]] },
+    "Set ENV": { "main": [[{ "node": "Fetch Unanswered >5m", "type": "main", "index": 0 }]] },
+    "Fetch Unanswered >5m": { "main": [[{ "node": "Split Conversations", "type": "main", "index": 0 }]] },
+    "Split Conversations": { "main": [[{ "node": "Slack @On-call", "type": "main", "index": 0 }, { "node": "SMS Escalation", "type": "main", "index": 0 }]] }
+  },
+  "active": false,
+  "settings": {},
+  "staticData": null,
+  "pinData": {}
+}

@@ -1,0 +1,251 @@
+{
+  "name": "Nurture Automation",
+  "type": "nurture",
+  "description": "Automated nurture sequences for leads and prospects",
+  "version": "1.0.0",
+  "schema": {
+    "type": "object",
+    "properties": {
+      "enabled": {
+        "type": "boolean",
+        "default": true,
+        "description": "Enable this automation"
+      },
+      "triggers": {
+        "type": "object",
+        "properties": {
+          "new_lead": {
+            "type": "boolean",
+            "default": true,
+            "description": "Start nurture sequence for new leads"
+          },
+          "lead_qualified": {
+            "type": "boolean",
+            "default": true,
+            "description": "Start nurture sequence for qualified leads"
+          },
+          "deal_lost": {
+            "type": "boolean",
+            "default": true,
+            "description": "Start nurture sequence for lost deals"
+          },
+          "inactive_contact": {
+            "type": "boolean",
+            "default": true,
+            "description": "Start nurture sequence for inactive contacts"
+          }
+        },
+        "required": ["new_lead", "lead_qualified", "deal_lost", "inactive_contact"]
+      },
+      "sequences": {
+        "type": "object",
+        "properties": {
+          "welcome_sequence": {
+            "type": "object",
+            "properties": {
+              "enabled": {
+                "type": "boolean",
+                "default": true
+              },
+              "steps": {
+                "type": "array",
+                "items": {
+                  "type": "object",
+                  "properties": {
+                    "delay_days": {
+                      "type": "integer",
+                      "minimum": 0,
+                      "maximum": 30
+                    },
+                    "channel": {
+                      "type": "string",
+                      "enum": ["email", "sms", "both"]
+                    },
+                    "template": {
+                      "type": "string"
+                    }
+                  },
+                  "required": ["delay_days", "channel", "template"]
+                }
+              }
+            },
+            "required": ["enabled", "steps"]
+          },
+          "follow_up_sequence": {
+            "type": "object",
+            "properties": {
+              "enabled": {
+                "type": "boolean",
+                "default": true
+              },
+              "steps": {
+                "type": "array",
+                "items": {
+                  "type": "object",
+                  "properties": {
+                    "delay_days": {
+                      "type": "integer",
+                      "minimum": 0,
+                      "maximum": 30
+                    },
+                    "channel": {
+                      "type": "string",
+                      "enum": ["email", "sms", "both"]
+                    },
+                    "template": {
+                      "type": "string"
+                    }
+                  },
+                  "required": ["delay_days", "channel", "template"]
+                }
+              }
+            },
+            "required": ["enabled", "steps"]
+          }
+        },
+        "required": ["welcome_sequence", "follow_up_sequence"]
+      },
+      "personalization": {
+        "type": "object",
+        "properties": {
+          "use_contact_name": {
+            "type": "boolean",
+            "default": true,
+            "description": "Personalize messages with contact name"
+          },
+          "use_company_name": {
+            "type": "boolean",
+            "default": true,
+            "description": "Personalize messages with company name"
+          },
+          "use_previous_interactions": {
+            "type": "boolean",
+            "default": true,
+            "description": "Reference previous interactions in messages"
+          },
+          "segment_by_tags": {
+            "type": "boolean",
+            "default": true,
+            "description": "Segment contacts by tags for targeted messaging"
+          }
+        },
+        "required": ["use_contact_name", "use_company_name", "use_previous_interactions", "segment_by_tags"]
+      },
+      "timing": {
+        "type": "object",
+        "properties": {
+          "business_hours_only": {
+            "type": "boolean",
+            "default": true,
+            "description": "Only send messages during business hours"
+          },
+          "timezone_aware": {
+            "type": "boolean",
+            "default": true,
+            "description": "Send messages in contact's timezone"
+          },
+          "max_messages_per_day": {
+            "type": "integer",
+            "default": 2,
+            "minimum": 1,
+            "maximum": 10,
+            "description": "Maximum messages per contact per day"
+          },
+          "sequence_pause_days": {
+            "type": "integer",
+            "default": 7,
+            "minimum": 1,
+            "maximum": 30,
+            "description": "Days to pause sequence if contact responds"
+          }
+        },
+        "required": ["business_hours_only", "timezone_aware", "max_messages_per_day", "sequence_pause_days"]
+      },
+      "templates": {
+        "type": "object",
+        "properties": {
+          "welcome_email": {
+            "type": "string",
+            "default": "Welcome to {business_name}!\n\nHi {contact_name},\n\nThank you for your interest in our services. We're excited to help you achieve your goals.\n\nHere's what you can expect from us:\n\n• Personalized service tailored to your needs\n• Regular updates on your progress\n• 24/7 support when you need it\n\nWe'll be in touch soon with more information.\n\nBest regards,\n{business_name} Team",
+            "description": "Welcome email template"
+          },
+          "follow_up_email": {
+            "type": "string",
+            "default": "Following up on your interest\n\nHi {contact_name},\n\nI wanted to follow up on your recent inquiry about our services.\n\nBased on our conversation, I think our {service_name} solution would be perfect for your needs.\n\nWould you be available for a brief call this week to discuss how we can help?\n\nBest regards,\n{business_name}",
+            "description": "Follow-up email template"
+          },
+          "nurture_sms": {
+            "type": "string",
+            "default": "Hi {contact_name}! Quick question about your {service_name} needs. When's a good time to chat? Reply STOP to opt out.",
+            "description": "Nurture SMS template"
+          }
+        },
+        "required": ["welcome_email", "follow_up_email", "nurture_sms"]
+      }
+    },
+    "required": ["enabled", "triggers", "sequences", "personalization", "timing", "templates"]
+  },
+  "defaultConfig": {
+    "enabled": true,
+    "triggers": {
+      "new_lead": true,
+      "lead_qualified": true,
+      "deal_lost": true,
+      "inactive_contact": true
+    },
+    "sequences": {
+      "welcome_sequence": {
+        "enabled": true,
+        "steps": [
+          {
+            "delay_days": 0,
+            "channel": "email",
+            "template": "welcome_email"
+          },
+          {
+            "delay_days": 3,
+            "channel": "sms",
+            "template": "nurture_sms"
+          },
+          {
+            "delay_days": 7,
+            "channel": "email",
+            "template": "follow_up_email"
+          }
+        ]
+      },
+      "follow_up_sequence": {
+        "enabled": true,
+        "steps": [
+          {
+            "delay_days": 1,
+            "channel": "email",
+            "template": "follow_up_email"
+          },
+          {
+            "delay_days": 5,
+            "channel": "sms",
+            "template": "nurture_sms"
+          }
+        ]
+      }
+    },
+    "personalization": {
+      "use_contact_name": true,
+      "use_company_name": true,
+      "use_previous_interactions": true,
+      "segment_by_tags": true
+    },
+    "timing": {
+      "business_hours_only": true,
+      "timezone_aware": true,
+      "max_messages_per_day": 2,
+      "sequence_pause_days": 7
+    },
+    "templates": {
+      "welcome_email": "Welcome to {business_name}!\n\nHi {contact_name},\n\nThank you for your interest in our services. We're excited to help you achieve your goals.\n\nHere's what you can expect from us:\n\n• Personalized service tailored to your needs\n• Regular updates on your progress\n• 24/7 support when you need it\n\nWe'll be in touch soon with more information.\n\nBest regards,\n{business_name} Team",
+      "follow_up_email": "Following up on your interest\n\nHi {contact_name},\n\nI wanted to follow up on your recent inquiry about our services.\n\nBased on our conversation, I think our {service_name} solution would be perfect for your needs.\n\nWould you be available for a brief call this week to discuss how we can help?\n\nBest regards,\n{business_name}",
+      "nurture_sms": "Hi {contact_name}! Quick question about your {service_name} needs. When's a good time to chat? Reply STOP to opt out."
+    }
+  }
+}

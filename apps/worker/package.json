@@ -1,0 +1,49 @@
+{
+  "name": "@clientflow/worker",
+  "version": "1.0.0",
+  "private": true,
+  "main": "dist/index.js",
+  "scripts": {
+    "dev": "tsx watch src/index.ts",
+    "build": "tsc",
+    "start": "node dist/index.js",
+    "lint": "eslint src --ext .ts",
+    "typecheck": "tsc --noEmit",
+    "clean": "rm -rf dist",
+    "test": "vitest"
+  },
+  "dependencies": {
+    "@clientflow/types": "workspace:*",
+    "@opentelemetry/api": "^1.7.0",
+    "@opentelemetry/auto-instrumentations-node": "^0.40.0",
+    "@opentelemetry/exporter-trace-otlp-http": "^0.45.0",
+    "@opentelemetry/instrumentation": "^0.45.0",
+    "@opentelemetry/resources": "^1.18.0",
+    "@opentelemetry/sdk-node": "^0.45.0",
+    "@opentelemetry/semantic-conventions": "^1.18.0",
+    "@sentry/node": "^7.91.0",
+    "@sentry/profiling-node": "^1.0.0",
+    "bullmq": "^4.15.0",
+    "cls-hooked": "^4.2.2",
+    "dotenv": "^16.3.1",
+    "ioredis": "^5.3.2",
+    "node-cron": "^3.0.3",
+    "pino": "^8.17.2",
+    "pino-pretty": "^10.3.1",
+    "prisma": "^5.7.0",
+    "@prisma/client": "^5.7.0",
+    "twilio": "^4.19.0",
+    "sendgrid": "^5.2.3",
+    "zod": "^3.22.4"
+  },
+  "devDependencies": {
+    "@clientflow/eslint-config": "workspace:*",
+    "@clientflow/tsconfig": "workspace:*",
+    "@types/node": "^20.10.0",
+    "@types/node-cron": "^3.0.11",
+    "@types/vitest": "^1.2.0",
+    "tsx": "^4.6.0",
+    "typescript": "^5.3.0",
+    "vitest": "^1.2.0"
+  }
+}

@@ -1,0 +1,409 @@
+{
+  "name": "Appointment Booking Workflow",
+  "nodes": [
+    {
+      "parameters": {
+        "httpMethod": "POST",
+        "path": "appointment-booking",
+        "responseMode": "responseNode",
+        "options": {}
+      },
+      "id": "webhook-trigger",
+      "name": "Appointment Request",
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 1,
+      "position": [240, 300],
+      "webhookId": "appointment-booking-webhook"
+    },
+    {
+      "parameters": {
+        "url": "={{ $env.CLIENTFLOW_API_URL }}/api/appointments",
+        "authentication": "genericCredentialType",
+        "genericAuthType": "httpHeaderAuth",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "Authorization",
+              "value": "Bearer {{ $env.CLIENTFLOW_API_KEY }}"
+            }
+          ]
+        },
+        "sendBody": true,
+        "bodyParameters": {
+          "parameters": [
+            {
+              "name": "business_id",
+              "value": "={{ $json.business_id }}"
+            },
+            {
+              "name": "customer_id",
+              "value": "={{ $json.customer_id }}"
+            },
+            {
+              "name": "title",
+              "value": "={{ $json.title || 'Appointment' }}"
+            },
+            {
+              "name": "description",
+              "value": "={{ $json.description || 'Scheduled appointment' }}"
+            },
+            {
+              "name": "start_time",
+              "value": "={{ $json.start_time }}"
+            },
+            {
+              "name": "end_time",
+              "value": "={{ $json.end_time }}"
+            },
+            {
+              "name": "status",
+              "value": "pending"
+            },
+            {
+              "name": "location",
+              "value": "={{ $json.location || 'TBD' }}"
+            },
+            {
+              "name": "notes",
+              "value": "={{ $json.notes || '' }}"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "create-appointment",
+      "name": "Create Appointment",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.1,
+      "position": [460, 300]
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict"
+          },
+          "conditions": [
+            {
+              "id": "appointment-created",
+              "leftValue": "={{ $json.success }}",
+              "rightValue": true,
+              "operator": {
+                "type": "boolean",
+                "operation": "equal"
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "id": "check-creation",
+      "name": "Check Creation Success",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2,
+      "position": [680, 300]
+    },
+    {
+      "parameters": {
+        "url": "={{ $env.CLIENTFLOW_API_URL }}/api/conversations",
+        "authentication": "genericCredentialType",
+        "genericAuthType": "httpHeaderAuth",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "Authorization",
+              "value": "Bearer {{ $env.CLIENTFLOW_API_KEY }}"
+            }
+          ]
+        },
+        "sendBody": true,
+        "bodyParameters": {
+          "parameters": [
+            {
+              "name": "customer_id",
+              "value": "={{ $('Appointment Request').item.json.customer_id }}"
+            },
+            {
+              "name": "thread_type",
+              "value": "appointment_confirmation"
+            },
+            {
+              "name": "channel",
+              "value": "sms"
+            },
+            {
+              "name": "priority",
+              "value": "normal"
+            },
+            {
+              "name": "tags",
+              "value": ["appointment", "confirmation"]
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "create-confirmation-conversation",
+      "name": "Create Confirmation Thread",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.1,
+      "position": [900, 200]
+    },
+    {
+      "parameters": {
+        "url": "={{ $env.CLIENTFLOW_API_URL }}/api/conversations/{{ $json.id }}/messages",
+        "authentication": "genericCredentialType",
+        "genericAuthType": "httpHeaderAuth",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "Authorization",
+              "value": "Bearer {{ $env.CLIENTFLOW_API_KEY }}"
+            }
+          ]
+        },
+        "sendBody": true,
+        "bodyParameters": {
+          "parameters": [
+            {
+              "name": "sender_type",
+              "value": "system"
+            },
+            {
+              "name": "sender_name",
+              "value": "ClientFlow AI"
+            },
+            {
+              "name": "body",
+              "value": "Hi! Your appointment has been scheduled for {{ $('Appointment Request').item.json.start_time }}. We'll send you a reminder 24 hours before. Reply STOP to opt out."
+            },
+            {
+              "name": "direction",
+              "value": "outbound"
+            },
+            {
+              "name": "message_type",
+              "value": "text"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "send-confirmation-sms",
+      "name": "Send Confirmation SMS",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.1,
+      "position": [1120, 200]
+    },
+    {
+      "parameters": {
+        "url": "={{ $env.CLIENTFLOW_API_URL }}/api/notifications",
+        "authentication": "genericCredentialType",
+        "genericAuthType": "httpHeaderAuth",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "Authorization",
+              "value": "Bearer {{ $env.CLIENTFLOW_API_KEY }}"
+            }
+          ]
+        },
+        "sendBody": true,
+        "bodyParameters": {
+          "parameters": [
+            {
+              "name": "business_id",
+              "value": "={{ $('Appointment Request').item.json.business_id }}"
+            },
+            {
+              "name": "type",
+              "value": "appointment_scheduled"
+            },
+            {
+              "name": "title",
+              "value": "New Appointment Scheduled"
+            },
+            {
+              "name": "message",
+              "value": "Appointment scheduled for {{ $('Appointment Request').item.json.start_time }} with customer {{ $('Appointment Request').item.json.customer_name }}"
+            },
+            {
+              "name": "priority",
+              "value": "normal"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "notify-staff",
+      "name": "Notify Staff",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.1,
+      "position": [1340, 200]
+    },
+    {
+      "parameters": {
+        "url": "={{ $env.CLIENTFLOW_API_URL }}/api/appointments/{{ $('Create Appointment').item.json.data.id }}/reminders",
+        "authentication": "genericCredentialType",
+        "genericAuthType": "httpHeaderAuth",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "Authorization",
+              "value": "Bearer {{ $env.CLIENTFLOW_API_KEY }}"
+            }
+          ]
+        },
+        "sendBody": true,
+        "bodyParameters": {
+          "parameters": [
+            {
+              "name": "reminder_time",
+              "value": "={{ $('Appointment Request').item.json.start_time }}"
+            },
+            {
+              "name": "reminder_type",
+              "value": "24_hours"
+            },
+            {
+              "name": "message",
+              "value": "Reminder: You have an appointment tomorrow at {{ $('Appointment Request').item.json.start_time }}. Reply CONFIRM to confirm or RESCHEDULE to reschedule."
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "schedule-reminder",
+      "name": "Schedule Reminder",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.1,
+      "position": [1560, 200]
+    },
+    {
+      "parameters": {
+        "respondWith": "json",
+        "responseBody": "={{ { \"success\": false, \"error\": \"Failed to create appointment\", \"details\": $json } }}"
+      },
+      "id": "error-response",
+      "name": "Error Response",
+      "type": "n8n-nodes-base.respondToWebhook",
+      "typeVersion": 1,
+      "position": [900, 400]
+    },
+    {
+      "parameters": {
+        "respondWith": "json",
+        "responseBody": "={{ { \"success\": true, \"message\": \"Appointment scheduled successfully\", \"appointment_id\": $('Create Appointment').item.json.data.id, \"confirmation_sent\": true } }}"
+      },
+      "id": "success-response",
+      "name": "Success Response",
+      "type": "n8n-nodes-base.respondToWebhook",
+      "typeVersion": 1,
+      "position": [1780, 200]
+    }
+  ],
+  "connections": {
+    "Appointment Request": {
+      "main": [
+        [
+          {
+            "node": "Create Appointment",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Create Appointment": {
+      "main": [
+        [
+          {
+            "node": "Check Creation Success",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Check Creation Success": {
+      "main": [
+        [
+          {
+            "node": "Create Confirmation Thread",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Error Response",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Create Confirmation Thread": {
+      "main": [
+        [
+          {
+            "node": "Send Confirmation SMS",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Send Confirmation SMS": {
+      "main": [
+        [
+          {
+            "node": "Notify Staff",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Notify Staff": {
+      "main": [
+        [
+          {
+            "node": "Schedule Reminder",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Schedule Reminder": {
+      "main": [
+        [
+          {
+            "node": "Success Response",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": true,
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "versionId": "1",
+  "meta": {
+    "templateCredsSetupCompleted": true
+  },
+  "id": "appointment-booking-workflow",
+  "tags": ["appointment", "booking", "automation"]
+}

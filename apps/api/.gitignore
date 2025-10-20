@@ -1,0 +1,116 @@
+# Dependencies
+node_modules/
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# Environment variables
+.env
+.env.local
+.env.development.local
+.env.test.local
+.env.production.local
+
+# Build outputs
+dist/
+build/
+.next/
+.nuxt/
+
+# Runtime data
+pids
+*.pid
+*.seed
+*.pid.lock
+
+# Coverage directory used by tools like istanbul
+coverage/
+
+# Dependency directories
+jspm_packages/
+
+# TypeScript cache
+*.tsbuildinfo
+
+# Optional npm cache directory
+.npm
+
+# Optional eslint cache
+.eslintcache
+
+# Microbundle cache
+.rpt2_cache/
+.rts2_cache_cjs/
+.rts2_cache_es/
+.rts2_cache_umd/
+
+# Optional REPL history
+.node_repl_history
+
+# Output of 'npm pack'
+*.tgz
+
+# Yarn Integrity file
+.yarn-integrity
+
+# dotenv environment variables file
+.env
+
+# parcel-bundler cache (https://parceljs.org/)
+.cache
+.parcel-cache
+
+# Stores VSCode versions used for testing VSCode extensions
+.vscode-test
+
+# Logs
+logs
+*.log
+
+# OS generated files
+.DS_Store
+.DS_Store?
+._*
+.Spotlight-V100
+.Trashes
+ehthumbs.db
+Thumbs.db
+
+# IDE files
+.idea/
+.vscode/
+*.swp
+*.swo
+*~
+
+# Testing
+/test-results/
+/coverage/
+
+# Temporary files
+*.tmp
+*.temp
+
+# Local development files
+.env.example
+setup-env.js
+configure-service-key.js
+test-*.js
+direct-test.js
+simple-test.js
+quick-test.js
+test-final.js
+test-server.js
+test-connection.js
+
+# SQL scripts (these are for setup only)
+*.sql
+CLEAN_SQL.sql
+FINAL_PERFECT_SQL.sql
+FINAL_SQL_SETUP.sql
+supabase-setup-complete.sql
+database-setup.sql
+
+# Documentation that's not needed in production
+FINAL_SETUP_STEPS.md
+VERCEL_DEPLOYMENT_FIX.md

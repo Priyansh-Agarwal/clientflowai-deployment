@@ -1,0 +1,215 @@
+{
+  "name": "Review Automation",
+  "type": "review",
+  "description": "Automatically requests and manages customer reviews",
+  "version": "1.0.0",
+  "schema": {
+    "type": "object",
+    "properties": {
+      "enabled": {
+        "type": "boolean",
+        "default": true,
+        "description": "Enable this automation"
+      },
+      "triggers": {
+        "type": "object",
+        "properties": {
+          "appointment_completed": {
+            "type": "boolean",
+            "default": true,
+            "description": "Request review after appointment completion"
+          },
+          "deal_won": {
+            "type": "boolean",
+            "default": true,
+            "description": "Request review after winning a deal"
+          },
+          "service_completed": {
+            "type": "boolean",
+            "default": true,
+            "description": "Request review after service completion"
+          },
+          "manual_trigger": {
+            "type": "boolean",
+            "default": true,
+            "description": "Allow manual review requests"
+          }
+        },
+        "required": ["appointment_completed", "deal_won", "service_completed", "manual_trigger"]
+      },
+      "timing": {
+        "type": "object",
+        "properties": {
+          "delay_hours": {
+            "type": "integer",
+            "default": 24,
+            "minimum": 1,
+            "maximum": 168,
+            "description": "Hours to wait before sending review request"
+          },
+          "follow_up_days": {
+            "type": "array",
+            "items": {
+              "type": "integer",
+              "minimum": 1,
+              "maximum": 30
+            },
+            "default": [3, 7],
+            "description": "Days to follow up if no review received"
+          },
+          "max_attempts": {
+            "type": "integer",
+            "default": 3,
+            "minimum": 1,
+            "maximum": 10,
+            "description": "Maximum review request attempts"
+          }
+        },
+        "required": ["delay_hours", "follow_up_days", "max_attempts"]
+      },
+      "channels": {
+        "type": "object",
+        "properties": {
+          "primary_channel": {
+            "type": "string",
+            "enum": ["sms", "email", "both"],
+            "default": "email",
+            "description": "Primary channel for review requests"
+          },
+          "fallback_channel": {
+            "type": "string",
+            "enum": ["sms", "email", "none"],
+            "default": "sms",
+            "description": "Fallback channel if primary fails"
+          },
+          "include_links": {
+            "type": "boolean",
+            "default": true,
+            "description": "Include direct links to review platforms"
+          }
+        },
+        "required": ["primary_channel", "fallback_channel", "include_links"]
+      },
+      "platforms": {
+        "type": "object",
+        "properties": {
+          "google": {
+            "type": "boolean",
+            "default": true,
+            "description": "Request Google reviews"
+          },
+          "yelp": {
+            "type": "boolean",
+            "default": true,
+            "description": "Request Yelp reviews"
+          },
+          "facebook": {
+            "type": "boolean",
+            "default": false,
+            "description": "Request Facebook reviews"
+          },
+          "custom_platform": {
+            "type": "string",
+            "default": "",
+            "description": "Custom review platform URL"
+          }
+        },
+        "required": ["google", "yelp", "facebook", "custom_platform"]
+      },
+      "templates": {
+        "type": "object",
+        "properties": {
+          "email_subject": {
+            "type": "string",
+            "default": "How was your experience with {business_name}?",
+            "description": "Email subject for review requests"
+          },
+          "email_body": {
+            "type": "string",
+            "default": "Hi {contact_name},\n\nThank you for choosing {business_name}! We hope you had a great experience.\n\nYour feedback is incredibly valuable to us and helps other customers make informed decisions.\n\nWould you mind taking a moment to leave us a review?\n\nGoogle: {google_link}\nYelp: {yelp_link}\n\nThank you for your time!\n\nBest regards,\n{business_name}",
+            "description": "Email body template for review requests"
+          },
+          "sms_body": {
+            "type": "string",
+            "default": "Hi {contact_name}! How was your experience with {business_name}? We'd love your feedback: {google_link} Reply STOP to opt out.",
+            "description": "SMS template for review requests"
+          },
+          "follow_up_email": {
+            "type": "string",
+            "default": "Hi {contact_name},\n\nWe noticed you haven't had a chance to leave a review yet. If you have a moment, we'd really appreciate your feedback!\n\nGoogle: {google_link}\nYelp: {yelp_link}\n\nThank you!\n\n{business_name}",
+            "description": "Follow-up email template"
+          }
+        },
+        "required": ["email_subject", "email_body", "sms_body", "follow_up_email"]
+      },
+      "filtering": {
+        "type": "object",
+        "properties": {
+          "min_rating_threshold": {
+            "type": "number",
+            "default": 4.0,
+            "minimum": 1.0,
+            "maximum": 5.0,
+            "description": "Only request reviews from satisfied customers"
+          },
+          "exclude_recent_customers": {
+            "type": "boolean",
+            "default": false,
+            "description": "Exclude customers who recently left a review"
+          },
+          "exclude_days": {
+            "type": "integer",
+            "default": 30,
+            "minimum": 0,
+            "maximum": 365,
+            "description": "Days to wait before requesting another review"
+          },
+          "business_hours_only": {
+            "type": "boolean",
+            "default": false,
+            "description": "Only send review requests during business hours"
+          }
+        },
+        "required": ["min_rating_threshold", "exclude_recent_customers", "exclude_days", "business_hours_only"]
+      }
+    },
+    "required": ["enabled", "triggers", "timing", "channels", "platforms", "templates", "filtering"]
+  },
+  "defaultConfig": {
+    "enabled": true,
+    "triggers": {
+      "appointment_completed": true,
+      "deal_won": true,
+      "service_completed": true,
+      "manual_trigger": true
+    },
+    "timing": {
+      "delay_hours": 24,
+      "follow_up_days": [3, 7],
+      "max_attempts": 3
+    },
+    "channels": {
+      "primary_channel": "email",
+      "fallback_channel": "sms",
+      "include_links": true
+    },
+    "platforms": {
+      "google": true,
+      "yelp": true,
+      "facebook": false,
+      "custom_platform": ""
+    },
+    "templates": {
+      "email_subject": "How was your experience with {business_name}?",
+      "email_body": "Hi {contact_name},\n\nThank you for choosing {business_name}! We hope you had a great experience.\n\nYour feedback is incredibly valuable to us and helps other customers make informed decisions.\n\nWould you mind taking a moment to leave us a review?\n\nGoogle: {google_link}\nYelp: {yelp_link}\n\nThank you for your time!\n\nBest regards,\n{business_name}",
+      "sms_body": "Hi {contact_name}! How was your experience with {business_name}? We'd love your feedback: {google_link} Reply STOP to opt out.",
+      "follow_up_email": "Hi {contact_name},\n\nWe noticed you haven't had a chance to leave a review yet. If you have a moment, we'd really appreciate your feedback!\n\nGoogle: {google_link}\nYelp: {yelp_link}\n\nThank you!\n\n{business_name}"
+    },
+    "filtering": {
+      "min_rating_threshold": 4.0,
+      "exclude_recent_customers": false,
+      "exclude_days": 30,
+      "business_hours_only": false
+    }
+  }
+}

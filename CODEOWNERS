@@ -1,0 +1,26 @@
+# Global owners
+* @clientflow/team
+
+# API
+apps/api/ @clientflow/backend-team
+
+# Web
+apps/web/ @clientflow/frontend-team
+
+# Worker
+apps/worker/ @clientflow/backend-team
+
+# Packages
+packages/ @clientflow/team
+
+# Documentation
+docs/ @clientflow/docs-team
+*.md @clientflow/docs-team
+
+# Configuration
+*.json @clientflow/devops-team
+*.yml @clientflow/devops-team
+*.yaml @clientflow/devops-team
+Dockerfile* @clientflow/devops-team
+docker-compose*.yml @clientflow/devops-team
+
