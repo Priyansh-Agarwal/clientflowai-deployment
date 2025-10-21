@@ -3,6 +3,7 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { useNavigate } from "react-router-dom";
 import { Check, Phone, Clock, Users, TrendingUp, Shield, Zap, Sparkles, Rocket, Target } from "lucide-react";
+import ClientFlowLogo from "@/components/ui/ClientFlowLogo";
 
 // Declare Calendly type for TypeScript
 declare global {
@@ -135,11 +136,7 @@ export default function Landing() {
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex justify-between items-center h-16">
             <div className="flex items-center space-x-3">
-              <div className="relative">
-                <Phone className="w-8 h-8 text-sky" />
-                <Sparkles className="w-4 h-4 text-teal absolute -top-1 -right-1 animate-pulse" />
-              </div>
-              <span className="text-xl font-bold text-white">ClientFlow AI</span>
+              <ClientFlowLogo width={160} height={48} />
               <Badge className="bg-teal text-white ml-2 hidden sm:inline-flex">Now Live</Badge>
             </div>
             <div className="flex items-center space-x-4">

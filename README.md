@@ -1,5 +1,11 @@
 # 🚀 ClientFlow AI Suite - Complete Production CRM
 
+<div align="center">
+  <img src="public/logo.svg" alt="ClientFlow AI Logo" width="300" height="90">
+  <br>
+  <em>Intelligent Business Automation</em>
+</div>
+
 [![Production Ready](https://img.shields.io/badge/Production-Ready-green)](https://github.com/Priyansh-Agarwal/clientflowai-deployment)
 [![AI Powered](https://img.shields.io/badge/AI-Powered-blue)](https://openai.com)
 [![Full Stack](https://img.shields.io/badge/Full-Stack-orange)](https://nextjs.org)

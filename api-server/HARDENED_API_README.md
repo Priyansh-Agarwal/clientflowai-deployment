@@ -155,7 +155,7 @@ REDIS_URL=redis://localhost:6379
 TWILIO_ACCOUNT_SID=your_twilio_sid
 TWILIO_AUTH_TOKEN=your_twilio_token
 SENDGRID_API_KEY=your_sendgrid_key
-STRIPE_SECRET_KEY=sk_live_your_stripe_key
+STRIPE_SECRET_KEY=your_stripe_secret_key_here
 OPENAI_API_KEY=sk-your_openai_key
 ```
 

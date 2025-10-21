@@ -40,7 +40,7 @@ TWILIO_FROM=+15555551234
 SENDGRID_API_KEY=your_sendgrid_api_key
 SENDGRID_FROM=noreply@clientflow.ai
 OPENAI_API_KEY=sk-your_openai_api_key
-STRIPE_SECRET_KEY=sk_live_your_stripe_secret_key
+STRIPE_SECRET_KEY=your_stripe_secret_key_here
 STRIPE_WEBHOOK_SECRET=whsec_your_stripe_webhook_secret
 ```
 

@@ -80,7 +80,7 @@ RATE_LIMIT_MAX_REQUESTS=1000
 WEBHOOK_RATE_LIMIT_MAX_REQUESTS=5000
 
 # Twilio (REQUIRED for SMS/Calls)
-TWILIO_ACCOUNT_SID=ACxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
+TWILIO_ACCOUNT_SID=your_twilio_account_sid_here
 TWILIO_AUTH_TOKEN=your_twilio_auth_token
 TWILIO_FROM_NUMBER=+1234567890
 

@@ -1,5 +1,3 @@
-'use client';
-
 import { useState } from 'react';
 import { Button } from '@/components/ui/button';
 import {
@@ -15,6 +13,7 @@ import { Badge } from '@/components/ui/badge';
 import { Bell, Search, Settings, LogOut, User } from 'lucide-react';
 import { useAuth } from '@/components/auth/auth-provider';
 import { OrgSelector } from '@/components/org/org-selector';
+import ClientFlowLogo from '@/components/ui/ClientFlowLogo';
 
 export function Header() {
   const { user, signOut } = useAuth();
@@ -31,8 +30,9 @@ export function Header() {
 
   return (
     <header className="flex h-16 items-center justify-between border-b bg-background px-6">
-      {/* Left side - Search */}
+      {/* Left side - Logo and Search */}
       <div className="flex items-center space-x-4">
+        <ClientFlowLogo width={120} height={36} className="flex-shrink-0" />
         <div className="relative">
           <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
           <input

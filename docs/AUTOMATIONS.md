@@ -323,7 +323,7 @@ SENDGRID_API_KEY=your_sendgrid_key
 SENDGRID_FROM=noreply@clientflow.ai
 
 # Payment Processing
-STRIPE_SECRET_KEY=sk_live_your_stripe_key
+STRIPE_SECRET_KEY=your_stripe_secret_key_here
 STRIPE_WEBHOOK_SECRET=whsec_your_webhook_secret
 
 # AI Services
